@@ -10,6 +10,7 @@ morpheme_count = list()
 
 
 
+
 train_readlines = f.readlines()
 #pos_count
 for line in train_readlines:
@@ -30,11 +31,19 @@ for line in train_readlines:
 			pos_count[pos]=0
 		pos_count[pos] += 1
 
+	#start pos
+	if pos_count.has_key("#")==False:
+			pos_count["#"]=0
+
+	pos_count["#"] +=1
+	# print 'd'
+
 
 print pos_count
 
-transition_prob = [[0 for col in range(pos_count.keys().size())] for row in range(pos_count.keys().size())]
+transition_prob = dict()
 
+# for transition probability
 for line in train_readlines:
 	if line == "\n":
 		continue
@@ -50,28 +59,32 @@ for line in train_readlines:
 
 		pos_list.append(i[i.rfind("/")+1:])
 
+	temp = 0 # for previous
 
-	for i in range(pos_list.size()):
-		if i == 0:
-			transition_prob = pos_count[pos_list[i-1]]
-		else:
+	for key in pos_list:
+		#print temp
+		if temp == 0:
+			transition_prob["#"] = dict()
+			transition_prob["#"][key] = pos_count[key] / (pos_count["#"] * len(pos_count.keys()))
 			
+		else:
+			transition_prob[temp] = dict()
+			transition_prob[temp][key] = pos_count[key] / (pos_count[temp] * len(pos_count.keys()))
+
+		temp = key
 
 
+# for observation probability
 
-		
-		
+# for line in train_readlines:
+# 	if line == "\n":
+# 		continue
 
+# 	morphemes = line.split("\t")[1][:-2]
 
+# 	observation_count = list()
 
-	
+#  	for i in morphemes.split("+"):
+#  		observation_count.append(i)
 
-		
-	for key in morpheme_count:
-		i = key.split("/")[1]
-		if(pos_count.has_key(i)==False):
-			pos_count[i] = 0
-		
-		pos_count[i] += 1
-		
-	print pos_count
+#  	for i in observation_count:
