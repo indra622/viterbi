@@ -7,6 +7,7 @@ f = open("train.txt")
 pos_count = dict()
 pos_list = list()
 morpheme_count = list()
+observ_list = list()
 
 
 
@@ -41,6 +42,7 @@ for line in train_readlines:
 
 print pos_count
 
+transition_dict = dict()
 transition_prob = dict()
 
 # for transition probability
@@ -59,32 +61,95 @@ for line in train_readlines:
 
 		pos_list.append(i[i.rfind("/")+1:])
 
-	temp = 0 # for previous
+	temp = '' # for previous
 
 	for key in pos_list:
 		#print temp
-		if temp == 0:
-			transition_prob["#"] = dict()
-			transition_prob["#"][key] = pos_count[key] / (pos_count["#"] * len(pos_count.keys()))
+
+
+		if temp == '':
+			transition_dict["#"] = dict()
+			transition_dict["#"][key] = 0
 			
 		else:
-			transition_prob[temp] = dict()
-			transition_prob[temp][key] = pos_count[key] / (pos_count[temp] * len(pos_count.keys()))
+			
+			if transition_dict.has_key(temp):
+				
+				pass
+			else:
+				
+				transition_dict[temp] = dict()
+
+			if transition_dict[temp].has_key(key):
+				
+				pass
+			
+			else:
+
+				transition_dict[temp][key] = 0
 
 		temp = key
 
 
-# for observation probability
+	temp1 = ''
 
-# for line in train_readlines:
-# 	if line == "\n":
-# 		continue
+	for key in pos_list:
+		#print temp
+		if temp1 == '':
+			transition_dict["#"][key] += 1
+			
+		else:
 
-# 	morphemes = line.split("\t")[1][:-2]
+			transition_dict[temp1][key] += 1
 
-# 	observation_count = list()
+		temp1 = key
 
-#  	for i in morphemes.split("+"):
-#  		observation_count.append(i)
+	for i in transition_dict:
+		for j in transition_dict[i]:
+			transition_prob[i] = dict()
+			transition_prob[i][j]= float(transition_dict[i][j]) / float(pos_count[i])
 
-#  	for i in observation_count:
+print transition_prob
+
+observation_dict = dict()
+observation_prob = dict()
+
+for line in train_readlines:
+	if line == "\n":
+		continue
+	
+	morphemes = line.split("\t")[1][:-2]
+
+	observation_count = list()
+
+ 	for i in morphemes.split("+"):
+ 		observation_count.append(i)
+
+ 	for i in observation_count:
+
+		word = i[:i.rfind("/")]
+		pos = i[i.rfind("/")+1:]
+
+		if observation_dict.has_key(word):
+			pass
+		else:
+			observation_dict[word] = dict()
+
+		if observation_dict[word].has_key(pos):
+				pass
+		else:
+			observation_dict[word][pos] = 0
+		
+	for i in observation_count:
+
+		word = i[:i.rfind("/")]
+		pos = i[i.rfind("/")+1:]
+
+		observation_dict[word][pos] += 1
+
+	for i in observation_dict:
+		for j in observation_dict[i]:
+			observation_prob[i] = dict()
+			observation_prob[i][j]= float(observation_dict[i][j]) / float(pos_count[j])
+
+print observation_prob
